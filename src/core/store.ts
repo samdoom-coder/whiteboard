@@ -8,7 +8,7 @@ import type {
 } from "../types";
 import { docId, uid } from "../util/id";
 import { sync } from "./sync";
-import { persistDocument, loadDocument, STORAGE_KEY } from "./persistence";
+import { persistDocument, loadDocument, STORAGE_KEY, loadStyle, saveStyle } from "./persistence";
 import { palettes } from "../util/color";
 
 export interface WhiteboardState {
@@ -95,6 +95,17 @@ const makeDoc = (): Document => ({
 
 const MAX_HISTORY = 120;
 
+const DEFAULT_ACTIVE_STYLE: ElementStyle = {
+  strokeColor: "#1e1e1e",
+  backgroundColor: "transparent",
+  fillStyle: "solid",
+  strokeWidth: 2,
+  strokeStyle: "solid",
+  opacity: 1,
+  roughness: 0.2,
+  roundness: 0.5,
+};
+
 const boundsOf = (els: Element[]) => {
   if (!els.length) return { minX: 0, minY: 0, maxX: 0, maxY: 0 };
   let minX = Infinity;
@@ -114,6 +125,7 @@ let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const useStore = create<WhiteboardState>()((set, get) => {
   const init = loadDocument() ?? makeDoc();
+  const activeStyle = loadStyle(DEFAULT_ACTIVE_STYLE);
 
   const save = () => {
     if (saveTimer) clearTimeout(saveTimer);
@@ -153,19 +165,13 @@ export const useStore = create<WhiteboardState>()((set, get) => {
     popoverOpen: false,
     setPopoverOpen: (v) => set({ popoverOpen: v }),
 
-    activeStyle: {
-      strokeColor: "#1e1e1e",
-      backgroundColor: "transparent",
-      fillStyle: "solid",
-      strokeWidth: 2,
-      strokeStyle: "solid",
-      opacity: 1,
-      roughness: 0.2,
-      roundness: 0.5,
-    },
-
+    activeStyle,
     setActiveStyle: (patch) => {
-      set((s) => ({ activeStyle: { ...s.activeStyle, ...patch } }));
+      set((s) => {
+        const next = { ...s.activeStyle, ...patch };
+        saveStyle(next);
+        return { activeStyle: next };
+      });
     },
 
     setScene: (patch) => {

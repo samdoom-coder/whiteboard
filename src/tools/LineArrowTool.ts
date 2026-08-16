@@ -88,6 +88,7 @@ export class LineArrowTool extends BaseTool {
     s.setElementsLive(next);
     s.commit();
     s.select([el2.id]);
+    s.setTool("selection");
     ctx.engine.emit();
   }
 

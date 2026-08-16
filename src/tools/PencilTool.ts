@@ -1,4 +1,4 @@
-import type { Point } from "../types";
+import type { Element, Point } from "../types";
 import { useStore } from "../core/store";
 import { makePencil } from "../core/elements";
 import { BaseTool, type ToolContext } from "./Tool";
@@ -52,6 +52,8 @@ export class PencilTool extends BaseTool {
   private mode: "drawing" | null = null;
   private minX = 0;
   private minY = 0;
+  /** id of the stroke currently being drawn */
+  private tempId: string | null = null;
 
   onPointerDown(ctx: ToolContext, p: CanvasPointer) {
     const s = useStore.getState();
@@ -62,23 +64,28 @@ export class PencilTool extends BaseTool {
     this.minX = p.wx;
     this.minY = p.wy;
     const el = makePencil(p.wx, p.wy, [{ x: 0, y: 0 }], { ...s.activeStyle });
+    this.tempId = el.id;
     s.setElementsLive([...s.doc.elements, el]);
     ctx.engine.emit();
   }
 
   onPointerMove(ctx: ToolContext, p: CanvasPointer) {
-    if (!this.mode) return;
+    if (!this.mode || !this.tempId) return;
     const s = useStore.getState();
     const pt = { x: p.wx - this.minX, y: p.wy - this.minY };
     const last = this.points[this.points.length - 1];
     if (last && Math.hypot(pt.x - last.x, pt.y - last.y) < 1.2) return;
     this.points.push(pt);
-    // update the temp pencil element
-    const temp = s.doc.elements.find((e) => e.type === "pencil");
-    const el = temp
-      ? { ...temp, points: this.points.slice() }
-      : makePencil(this.minX, this.minY, this.points.slice(), { ...s.activeStyle });
-    s.setElementsLive([...s.doc.elements.filter((e) => e.id !== el.id), el]);
+    // update only the stroke being drawn
+    const temp = s.doc.elements.find((e) => e.id === this.tempId);
+    let el: Element;
+    if (temp) {
+      el = { ...temp, points: this.points.slice() } as Element;
+    } else {
+      el = makePencil(this.minX, this.minY, this.points.slice(), { ...s.activeStyle });
+      this.tempId = el.id;
+    }
+    s.setElementsLive([...s.doc.elements.filter((e) => e.id !== this.tempId), el]);
     ctx.engine.emit();
   }
 
@@ -90,8 +97,9 @@ export class PencilTool extends BaseTool {
     const simplified = simplifyPoints(this.points, SIMPLIFY);
     if (simplified.length < 2) {
       // remove
-      const pencil = s.doc.elements.find((e) => e.type === "pencil");
-      if (pencil) s.setElementsLive(s.doc.elements.filter((e) => e.id !== pencil.id));
+      if (this.tempId) s.setElementsLive(s.doc.elements.filter((e) => e.id !== this.tempId));
+      this.tempId = null;
+      this.points = [];
       s.commit();
       return;
     }
@@ -103,23 +111,26 @@ export class PencilTool extends BaseTool {
       minY = Math.min(minY, p.y);
     }
     const normalized = simplified.map((p) => ({ x: p.x - minX, y: p.y - minY }));
-    const pencil = s.doc.elements.find((e) => e.type === "pencil");
+    const pencil = this.tempId ? s.doc.elements.find((e) => e.id === this.tempId) : null;
     const el = pencil
       ? { ...pencil, points: normalized, x: this.minX + minX, y: this.minY + minY }
       : makePencil(this.minX + minX, this.minY + minY, normalized, { ...s.activeStyle });
-    s.setElementsLive([...s.doc.elements.filter((e) => e.id !== el.id), el]);
+    s.setElementsLive([...s.doc.elements.filter((e) => e.id !== this.tempId), el]);
     s.commit();
     s.select([el.id]);
+    s.setTool("selection");
     ctx.engine.emit();
+    this.tempId = null;
+    this.points = [];
   }
 
   onCancel() {
     const s = useStore.getState();
-    const pencil = s.doc.elements.find((e) => e.type === "pencil" && s.previewing);
-    if (pencil) {
-      s.setElementsLive(s.doc.elements.filter((e) => e.id !== pencil.id));
+    if (this.tempId) {
+      s.setElementsLive(s.doc.elements.filter((e) => e.id !== this.tempId));
       s.commit();
     }
+    this.tempId = null;
     this.mode = null;
     this.points = [];
     s.setPreviewing(false);

@@ -176,6 +176,13 @@ const paths: Record<string, React.ReactNode> = {
   rotate: <path d="M4 10a8 8 0 0 1 16 0M4 10V5M4 10h5M20 14a8 8 0 0 1-16 0M20 14v5M20 14h-5" />,
   lock: <><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
   send: <path d="M22 2L11 13M22 2l-7 20-4-9-9-4z" />,
+  menu: <path d="M4 6h16M4 12h16M4 18h16" />,
+  save: (
+    <>
+      <path d="M5 3h11l4 4v14H5z" />
+      <path d="M8 3v5h7V3M8 21v-7h8v7" />
+    </>
+  ),
 };
 
 export const Icon = ({ name, ...rest }: IconProps & { name: string }) => (

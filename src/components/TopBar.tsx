@@ -1,44 +1,19 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useStore } from "../core/store";
 import { Icon } from "./Icon";
 import { getEngine } from "../render/engineRegistry";
-import { SettingsPopover } from "./SettingsPopover";
-import { TemplatesPopover } from "./TemplatesMenu";
-import { ExportDialog } from "./ExportDialog";
+import { HamburgerMenu } from "./HamburgerMenu";
 
 export function TopBar() {
   const doc = useStore((s) => s.doc);
-  const theme = useStore((s) => s.theme);
-  const setTheme = useStore((s) => s.setTheme);
   const undo = useStore((s) => s.undo);
   const redo = useStore((s) => s.redo);
   const saveStatus = useStore((s) => s.saveStatus);
   const canUndo = useStore((s) => s.historyPast.length > 0);
   const canRedo = useStore((s) => s.historyFuture.length > 0);
   const setCanvasName = useStore((s) => s.setCanvasName);
-  const setPopoverOpen = useStore((s) => s.setPopoverOpen);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [editingName, setEditingName] = useState(false);
-
-  const toggleSettings = () => {
-    const v = !settingsOpen;
-    setSettingsOpen(v);
-    setPopoverOpen(v);
-  };
-
-  const toggleTemplates = () => {
-    const v = !templatesOpen;
-    setTemplatesOpen(v);
-    setPopoverOpen(v);
-  };
-
-  const onExport = useCallback(() => {
-    setExportOpen(true);
-    setSettingsOpen(false);
-    setPopoverOpen(false);
-  }, []);
 
   return (
     <div className="topbar">
@@ -93,32 +68,14 @@ export function TopBar() {
         <button className="btn btn-icon" disabled={!canRedo} onClick={redo} title="Redo (Ctrl+Shift+Z)" aria-label="Redo">
           <Icon name="redo" />
         </button>
-        <div className="tooltip-wrap">
-          <button className="btn btn-icon" onClick={toggleTemplates} title="Templates" aria-label="Templates">
-            <Icon name="template" />
-          </button>
-          <TemplatesPopover open={templatesOpen} onClose={() => { setTemplatesOpen(false); setPopoverOpen(false); }} />
-        </div>
-        <button className="btn btn-icon" onClick={onExport} title="Export (PNG / SVG / JSON)" aria-label="Export">
-          <Icon name="download" />
-        </button>
-        <button className="btn btn-icon" onClick={toggleSettings} title="Settings" aria-label="Settings">
-          <Icon name="settings" />
-        </button>
-        <button className="btn btn-icon" onClick={() => setTheme(theme === "light" ? "dark" : "light")} title="Toggle theme" aria-label="Toggle theme">
-          <Icon name={theme === "light" ? "moon" : "sun"} />
-        </button>
-        {settingsOpen && (
-          <div className="popover floating panel-enter" onClick={(e) => e.stopPropagation()}>
-            <SettingsPopover onExport={onExport} />
-          </div>
-        )}
+      </div>
+      <div className="bar-group">
+        <HamburgerMenu open={menuOpen} onToggle={setMenuOpen} />
       </div>
       <span className="save-status" style={{ position: "absolute", right: 12, bottom: -20 }}>
         <span className={`dot ${saveStatus}`} />
         {saveStatus === "saved" ? "Saved" : saveStatus === "error" ? "Offline" : "Saving…"}
       </span>
-      <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
     </div>
   );
 }

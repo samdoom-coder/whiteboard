@@ -1,8 +1,8 @@
-import type { Element, Point, TextElement } from "../types";
+import type { Element, LineElement, Point, TextElement } from "../types";
 import { useStore } from "../core/store";
 import { BaseTool, type ToolContext } from "./Tool";
 import type { CanvasPointer } from "../render/engine";
-import { hitTestElements, elementsInRect } from "../render/geometry";
+import { hitTestElements, elementsInRect, worldToLocal } from "../render/geometry";
 import {
   resizeElement,
   resizeGroup,
@@ -13,6 +13,9 @@ import {
 import {
   computeSelectionVisual,
   hitTestHandle,
+  hitTestLinePoint,
+  hitTestLineMidpoint,
+  insertLinePoint,
 } from "../render/selectionOverlay";
 import { degreesToRadians } from "../util/math";
 import { measureTextWidth, textHeight } from "../render/renderer";
@@ -22,6 +25,7 @@ type Mode =
   | { kind: "move"; startElements: Element[]; startP: Point }
   | { kind: "resize"; handle: Exclude<ResizeHandle, "rotate">; startElements: Element[]; box: ReturnType<typeof computeSelectionVisual> }
   | { kind: "rotate"; startElements: Element[]; box: ReturnType<typeof computeSelectionVisual> }
+  | { kind: "linepoint"; line: LineElement; index: number }
   | { kind: "marquee"; startP: Point; startScreen: Point };
 
 export class SelectionTool extends BaseTool {
@@ -43,6 +47,28 @@ export class SelectionTool extends BaseTool {
       return;
     }
     const selected = this.getSelected(ctx);
+
+    // 0. line / arrow curve-point editing (single selection)
+    if (selected.length === 1) {
+      const sel = selected[0];
+      if (sel.type === "line" || sel.type === "arrow") {
+        const line = sel as LineElement;
+        const idx = hitTestLinePoint(line, { x: p.sx, y: p.sy }, ctx.getView());
+        if (idx !== null) {
+          s.beginGesture();
+          this.mode = { kind: "linepoint", line, index: idx };
+          return;
+        }
+        const seg = hitTestLineMidpoint(line, { x: p.sx, y: p.sy }, ctx.getView());
+        if (seg !== null) {
+          s.beginGesture();
+          const withPoint = insertLinePoint(line, seg);
+          s.setElementsLive(replaceByIds(s.doc.elements, [withPoint]));
+          this.mode = { kind: "linepoint", line: withPoint, index: seg + 1 };
+          return;
+        }
+      }
+    }
 
     // 1. try handles
     if (selected.length) {
@@ -92,6 +118,16 @@ export class SelectionTool extends BaseTool {
   onPointerMove(ctx: ToolContext, p: CanvasPointer) {
     const s = useStore.getState();
     const m = this.mode;
+
+    if (m.kind === "linepoint") {
+      const line = m.line;
+      const local = worldToLocal(line, { x: p.wx, y: p.wy });
+      const pts = line.points.map((pt, i) => (i === m.index ? local : pt));
+      const next = { ...line, points: pts };
+      s.setElementsLive(replaceByIds(s.doc.elements, [next]));
+      this.mode = { ...m, line: next };
+      return;
+    }
 
     if (m.kind === "move") {
       let dx = p.wx - m.startP.x;
@@ -158,6 +194,8 @@ export class SelectionTool extends BaseTool {
       if (moved.length) {
         s.commit();
       }
+    } else if (m.kind === "linepoint") {
+      s.commit();
     } else if (m.kind === "resize" || m.kind === "rotate") {
       s.commit();
       // re-measure text after resize
@@ -246,6 +284,7 @@ export class SelectionTool extends BaseTool {
   cursor(ctx: ToolContext, p?: CanvasPointer): string {
     const s = useStore.getState();
     if (!p) return "default";
+    if (this.mode.kind === "linepoint") return "move";
     if (this.mode.kind === "move") return "move";
     if (this.mode.kind === "resize") {
       return cursorForHandle(this.mode.handle);

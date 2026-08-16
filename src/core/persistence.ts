@@ -4,6 +4,25 @@ import { palettes } from "../util/color";
 
 export const STORAGE_KEY = "whiteboard:doc";
 const BACKUP_KEY = "whiteboard:doc:backup";
+export const STYLE_KEY = "whiteboard:style";
+
+export const loadStyle = <T extends object>(fallback: T): T => {
+  try {
+    const raw = localStorage.getItem(STYLE_KEY);
+    if (!raw) return fallback;
+    return { ...fallback, ...(JSON.parse(raw) as Partial<T>) };
+  } catch {
+    return fallback;
+  }
+};
+
+export const saveStyle = (style: object) => {
+  try {
+    localStorage.setItem(STYLE_KEY, JSON.stringify(style));
+  } catch {
+    /* ignore */
+  }
+};
 
 export interface StoredDocument extends Document {
   __v: number;

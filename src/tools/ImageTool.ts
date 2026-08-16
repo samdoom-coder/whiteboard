@@ -36,6 +36,7 @@ export class ImageTool extends BaseTool {
       setPendingImage(null);
       s.addElements([el]);
       s.select([el.id]);
+      s.setTool("selection");
       ctx.engine.emit();
     } else {
       pickerHandler?.();

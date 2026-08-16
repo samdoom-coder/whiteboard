@@ -3,10 +3,42 @@ import { useStore } from "../core/store";
 import { Icon } from "./Icon";
 
 export function SettingsPopover({ onExport }: { onExport: () => void }) {
-  const doc = useStore((s) => s.doc);
-  const setScene = useStore((s) => s.setScene);
   const clearCanvas = useStore((s) => s.clearCanvas);
   const [confirmClear, setConfirmClear] = useState(false);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <CanvasSettingsContent />
+      <div className="style-section">
+        <span className="style-label">Actions</span>
+        <button className="btn" onClick={onExport}>
+          <Icon name="download" size={15} />
+          Export canvas
+        </button>
+        {confirmClear ? (
+          <div className="row">
+            <button className="btn danger" onClick={() => { clearCanvas(); setConfirmClear(false); }}>
+              <Icon name="trash" size={14} />
+              Yes, clear all
+            </button>
+            <button className="btn" onClick={() => setConfirmClear(false)}>
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button className="btn danger" onClick={() => setConfirmClear(true)}>
+            <Icon name="trash" size={15} />
+            Clear canvas
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function CanvasSettingsContent() {
+  const doc = useStore((s) => s.doc);
+  const setScene = useStore((s) => s.setScene);
   const backgrounds = [
     { id: "none" as const, label: "Plain", icon: "rect" },
     { id: "grid" as const, label: "Grid", icon: "grid" },
@@ -15,7 +47,7 @@ export function SettingsPopover({ onExport }: { onExport: () => void }) {
   const bgColors = ["#faf9f5", "#ffffff", "#f1f3f5", "#e9ecef", "#fdf0d5", "#e7f5ff", "#e6fcf5", "#1c1b1a", "#24272e", "#101418"];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <>
       <div className="style-section">
         <span className="style-label">Canvas background</span>
         <div className="seg">
@@ -44,29 +76,6 @@ export function SettingsPopover({ onExport }: { onExport: () => void }) {
           ))}
         </div>
       </div>
-      <div className="style-section">
-        <span className="style-label">Actions</span>
-        <button className="btn" onClick={onExport}>
-          <Icon name="download" size={15} />
-          Export canvas
-        </button>
-        {confirmClear ? (
-          <div className="row">
-            <button className="btn danger" onClick={() => { clearCanvas(); setConfirmClear(false); }}>
-              <Icon name="trash" size={14} />
-              Yes, clear all
-            </button>
-            <button className="btn" onClick={() => setConfirmClear(false)}>
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button className="btn danger" onClick={() => setConfirmClear(true)}>
-            <Icon name="trash" size={15} />
-            Clear canvas
-          </button>
-        )}
-      </div>
-    </div>
+    </>
   );
 }

@@ -14,6 +14,7 @@ import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 export default function App() {
   const theme = useStore((s) => s.theme);
   const popoverOpen = useStore((s) => s.popoverOpen);
+  const hasSelection = useStore((s) => s.selectedIds.length > 0);
   const ui = useKeyboardShortcuts();
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function App() {
       <CanvasHost />
       <Toolbar />
       <MobileToolbar />
-      {!popoverOpen && <StylePanel />}
+      {hasSelection && !popoverOpen && <StylePanel />}
       <ZoomControls />
       <ContextMenu />
       <AIPanel open={ui.aiOpen} onClose={() => ui.setAiOpen(false)} />

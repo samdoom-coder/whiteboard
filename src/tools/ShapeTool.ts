@@ -97,6 +97,7 @@ export class ShapeTool extends BaseTool {
     s.setElementsLive([...s.doc.elements.filter((e) => e.id !== el.id), el]);
     s.commit();
     s.select([el.id]);
+    s.setTool("selection");
     ctx.engine.emit();
   }
 

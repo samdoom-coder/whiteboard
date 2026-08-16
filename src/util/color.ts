@@ -116,6 +116,7 @@ export const elementColors = {
     "#a61e4d",
     "#7048e8",
     "#6a6a68",
+    "#ffffff",
   ],
   fills: [
     "transparent",

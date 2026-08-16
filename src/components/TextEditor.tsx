@@ -51,6 +51,7 @@ export function TextEditor({ id }: { id: string }) {
       s.setElementsLive(s.doc.elements.map((e) => (e.id === id ? fitted : e)));
       s.commit();
       s.select([id]);
+      s.setTool("selection");
     }
     s.setEditingText(null);
   };
