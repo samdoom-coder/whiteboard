@@ -105,7 +105,3 @@ src/
 - **Add a tool** — create a class implementing the `Tool` interface in `src/tools/` and register it in `src/tools/index.ts`.
 - **Add a template** — append to the `templates` array in `src/templates/index.ts`.
 - **Realtime collaboration** — `src/core/sync.ts` ships with a local-only `SyncBackend` interface; plug in a WebSocket / CRDT backend without touching the rest of the app.
-
-## 📄 License
-
-MIT
