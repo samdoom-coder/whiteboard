@@ -1,4 +1,5 @@
 # Whiteboard
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/samdoom-coder/whiteboard/blob/main/LICENSE)
 
 A fast, client-side whiteboarding app with a hand-drawn aesthetic. Sketch shapes, connect arrows, drop in images, and turn plain-text ideas into structured diagrams — all in your browser.
 
