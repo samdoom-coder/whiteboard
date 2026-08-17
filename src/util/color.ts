@@ -82,6 +82,19 @@ export const palettes: Record<Theme, ThemePalette> = {
   },
 };
 
+/** True when a hex color is perceived as dark (low luminance). */
+export const isDarkColor = (hex: string): boolean => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return false;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128;
+};
+
+/** Foreground color that stays readable on a given background. */
+export const contrastingColor = (bg: string, dark: string, light: string): string =>
+  isDarkColor(bg) ? dark : light;
+
 export const withAlpha = (hex: string, alpha: number): string => {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);

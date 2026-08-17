@@ -1,6 +1,6 @@
 import type { Element, ViewState } from "../types";
 import { useStore } from "../core/store";
-import { palettes } from "../util/color";
+import { contrastingColor, palettes } from "../util/color";
 import { screenToWorld, zoomAtScreen } from "./camera";
 import { drawElement } from "./renderer";
 import { drawSelectionOverlay } from "./selectionOverlay";
@@ -135,7 +135,6 @@ export class CanvasEngine {
     const ctx = this.ctx;
     const state = useStore.getState();
     const view = state.doc.scene.view;
-    const theme = palettes[state.theme];
 
     // background
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
@@ -143,7 +142,7 @@ export class CanvasEngine {
     ctx.fillStyle = state.doc.scene.backgroundColor;
     ctx.fillRect(0, 0, this.width, this.height);
 
-    this.drawBackground(ctx, view, theme);
+    this.drawBackground(ctx, view);
 
     // elements
     const worldVisible = this.visibleWorldRect(view);
@@ -213,11 +212,16 @@ export class CanvasEngine {
   private drawBackground(
     ctx: CanvasRenderingContext2D,
     view: ViewState,
-    theme: (typeof palettes)["light"],
   ) {
     const state = useStore.getState();
     const bg = state.doc.scene.background;
     const { zoom, scrollX, scrollY } = view;
+
+    // foreground follows the canvas background brightness, not the app theme,
+    // so dark canvases always get light grid/dots and vice-versa
+    const bgColor = state.doc.scene.backgroundColor;
+    const gridColor = contrastingColor(bgColor, "rgba(255,255,255,0.10)", "rgba(0,0,0,0.06)");
+    const dotColor = contrastingColor(bgColor, "rgba(255,255,255,0.16)", "rgba(0,0,0,0.12)");
 
     if (bg === "grid") {
       let step = 20;
@@ -227,7 +231,7 @@ export class CanvasEngine {
       const x0 = Math.floor(startWorld.x / step) * step;
       const y0 = Math.floor(startWorld.y / step) * step;
       ctx.save();
-      ctx.strokeStyle = theme.gridLines;
+      ctx.strokeStyle = gridColor;
       ctx.lineWidth = 1;
       ctx.beginPath();
       for (let x = x0; x <= endWorld.x; x += step) {
@@ -250,7 +254,7 @@ export class CanvasEngine {
       const x0 = Math.floor(startWorld.x / step) * step;
       const y0 = Math.floor(startWorld.y / step) * step;
       ctx.save();
-      ctx.fillStyle = theme.dot;
+      ctx.fillStyle = dotColor;
       const r = Math.max(0.6, 1.4 / Math.min(1, zoom) * 0.5);
       ctx.beginPath();
       for (let x = x0; x <= endWorld.x; x += step) {

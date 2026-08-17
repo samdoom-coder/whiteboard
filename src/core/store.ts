@@ -9,7 +9,7 @@ import type {
 import { docId, uid } from "../util/id";
 import { sync } from "./sync";
 import { persistDocument, loadDocument, STORAGE_KEY, loadStyle, saveStyle } from "./persistence";
-import { palettes } from "../util/color";
+import { palettes, isDarkColor } from "../util/color";
 
 export interface WhiteboardState {
   doc: Document;
@@ -106,6 +106,12 @@ const DEFAULT_ACTIVE_STYLE: ElementStyle = {
   roundness: 0.5,
 };
 
+const DEFAULT_STROKE_LIGHT = "#1e1e1e";
+const DEFAULT_STROKE_DARK = "#ffffff";
+/** the default stroke is only auto-adapted while the user hasn't picked a custom color */
+const isDefaultStroke = (c: string) => c === DEFAULT_STROKE_LIGHT || c === DEFAULT_STROKE_DARK;
+const strokeForBackground = (bg: string) => (isDarkColor(bg) ? DEFAULT_STROKE_DARK : DEFAULT_STROKE_LIGHT);
+
 const boundsOf = (els: Element[]) => {
   if (!els.length) return { minX: 0, minY: 0, maxX: 0, maxY: 0 };
   let minX = Infinity;
@@ -175,10 +181,28 @@ export const useStore = create<WhiteboardState>()((set, get) => {
     },
 
     setScene: (patch) => {
-      set((s) => ({
-        doc: { ...s.doc, scene: { ...s.doc.scene, ...patch }, updatedAt: Date.now() },
-        saveStatus: "dirty",
-      }));
+      set((s) => {
+        const next: { doc: Document; saveStatus: "dirty"; activeStyle?: ElementStyle } = {
+          doc: {
+            ...s.doc,
+            scene: { ...s.doc.scene, ...patch },
+            updatedAt: Date.now(),
+          },
+          saveStatus: "dirty",
+        };
+        if (
+          patch.backgroundColor &&
+          patch.backgroundColor !== s.doc.scene.backgroundColor &&
+          isDefaultStroke(s.activeStyle.strokeColor)
+        ) {
+          const strokeColor = strokeForBackground(patch.backgroundColor);
+          if (strokeColor !== s.activeStyle.strokeColor) {
+            next.activeStyle = { ...s.activeStyle, strokeColor };
+            saveStyle(next.activeStyle);
+          }
+        }
+        return next;
+      });
       save();
     },
 
@@ -192,7 +216,17 @@ export const useStore = create<WhiteboardState>()((set, get) => {
     },
 
     setTheme: (t) => {
-      set({ theme: t });
+      set((s) => {
+        const next: { theme: Theme; activeStyle?: ElementStyle } = { theme: t };
+        if (isDefaultStroke(s.activeStyle.strokeColor)) {
+          const strokeColor = strokeForBackground(s.doc.scene.backgroundColor);
+          if (strokeColor !== s.activeStyle.strokeColor) {
+            next.activeStyle = { ...s.activeStyle, strokeColor };
+            saveStyle(next.activeStyle);
+          }
+        }
+        return next;
+      });
       try {
         localStorage.setItem(`${STORAGE_KEY}:theme`, t);
       } catch {
