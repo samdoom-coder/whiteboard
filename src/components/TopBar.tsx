@@ -19,9 +19,9 @@ export function TopBar() {
     <div className="topbar">
       <div className="topbar-brand">
         <div className="brand-logo">
-          <Icon name="spark" size={17} />
+          <img src="/favicon.png" alt="logo" style={{width: 30, height: 30}} />
         </div>
-        <span className="brand-name">Scribble</span>
+        <span className="brand-name">Whiteboard</span>
         {editingName ? (
           <input
             className="doc-name-input"

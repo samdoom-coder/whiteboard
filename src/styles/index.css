@@ -171,9 +171,9 @@ button {
   border-radius: 8px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--accent), #8a5cf6);
+  background: radial-gradient(circle at center, #545a5d 10%, #000000 80%);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(91, 110, 225, 0.35);
+  box-shadow: 0 2px 8px rgba(16, 16, 19, 0.35);
 }
 
 .brand-name {
