@@ -52,8 +52,6 @@ export const exportToPNG = async (
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, w, h);
     ctx.restore();
-    ctx.scale(opts.scale, opts.scale);
-    ctx.translate(-bounds.minX, -bounds.minY);
   }
 
   // wait for all images to be loaded
@@ -229,12 +227,10 @@ export const exportToSVG = (
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${(
     Number(w) * scale
-  ).toFixed(2)}" height="${(Number(h) * scale).toFixed(2)}" viewBox="${(-OFFSET).toFixed(
-    2,
-  )} ${(-OFFSET).toFixed(2)} ${w} ${h}" font-family="Inter, system-ui, sans-serif">
+  ).toFixed(2)}" height="${(Number(h) * scale).toFixed(2)}" viewBox="0 0 ${w} ${h}" font-family="Inter, system-ui, sans-serif">
 <defs>${defs.join("")}</defs>
 ${bgRect}
-<g transform="translate(${(-bounds.minX).toFixed(2)} ${(-bounds.minY).toFixed(2)}) scale(${scale})">
+<g transform="translate(${(-bounds.minX).toFixed(2)} ${(-bounds.minY).toFixed(2)})">
 ${body.join("\n")}
 </g>
 </svg>`;
