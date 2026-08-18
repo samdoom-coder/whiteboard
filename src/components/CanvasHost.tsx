@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { CanvasEngine } from "../render/engine";
 import { setEngine, clearEngine } from "../render/engineRegistry";
 import { useStore } from "../core/store";
+import { useCollab } from "../core/collaboration";
+import { screenToWorld } from "../render/camera";
 import { setPendingImage } from "../tools/ImageTool";
 import { setMarqueeCleanup } from "../tools/SelectionTool";
 import { makeImage } from "../core/elements";
 import { TextEditor } from "./TextEditor";
 import { EmptyState } from "./EmptyState";
 import { Minimap } from "./Minimap";
+import { CollaboratorCursors } from "./CollaboratorCursors";
 
 const readFileAsDataURL = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -88,11 +91,26 @@ export function CanvasHost() {
     };
   }, []);
 
+  // broadcast our pointer position to collaborators (world coords)
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const onMove = (e: PointerEvent) => {
+      const view = useStore.getState().doc.scene.view;
+      const rect = host.getBoundingClientRect();
+      const w = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, view);
+      useCollab.getState().publishCursor(w.x, w.y);
+    };
+    host.addEventListener("pointermove", onMove);
+    return () => host.removeEventListener("pointermove", onMove);
+  }, []);
+
   return (
     <div className="canvas-host" ref={hostRef}>
       <canvas ref={canvasRef} />
       {!hasElements && <EmptyState />}
       {editingTextId && engine && <TextEditor id={editingTextId} />}
+      <CollaboratorCursors />
       <Minimap engine={engine} />
     </div>
   );

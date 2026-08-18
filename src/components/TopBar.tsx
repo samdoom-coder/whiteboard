@@ -3,6 +3,7 @@ import { useStore } from "../core/store";
 import { Icon } from "./Icon";
 import { getEngine } from "../render/engineRegistry";
 import { HamburgerMenu } from "./HamburgerMenu";
+import { CollaborationMenu } from "./CollaborationMenu";
 
 export function TopBar() {
   const doc = useStore((s) => s.doc);
@@ -13,6 +14,7 @@ export function TopBar() {
   const canRedo = useStore((s) => s.historyFuture.length > 0);
   const setCanvasName = useStore((s) => s.setCanvasName);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [collabOpen, setCollabOpen] = useState(false);
   const [editingName, setEditingName] = useState(false);
 
   return (
@@ -68,6 +70,9 @@ export function TopBar() {
         <button className="btn btn-icon" disabled={!canRedo} onClick={redo} title="Redo (Ctrl+Shift+Z)" aria-label="Redo">
           <Icon name="redo" />
         </button>
+      </div>
+      <div className="bar-group">
+        <CollaborationMenu open={collabOpen} onToggle={setCollabOpen} />
       </div>
       <div className="bar-group">
         <HamburgerMenu open={menuOpen} onToggle={setMenuOpen} />

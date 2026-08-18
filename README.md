@@ -5,7 +5,7 @@
 
 A fast, client-side whiteboarding app with a hand-drawn aesthetic. Sketch shapes, connect arrows, drop in images, and turn plain-text ideas into structured diagrams — all in your browser.
 
-Everything runs locally in your browser. Documents are autosaved to `localStorage`, and there is no server or account required.
+Everything runs locally in your browser. Documents are autosaved to `localStorage`, and there is no account required. For **real-time collaboration**, an optional tiny WebSocket relay server brokers shared rooms between peers.
 
 ## ✨ Features
 
@@ -33,6 +33,8 @@ Everything runs locally in your browser. Documents are autosaved to `localStorag
 - **AI assistant** — describe a system in plain English (e.g. *"mobile app → API gateway → backend with PostgreSQL, Redis, S3"*) and it generates an architecture diagram on the canvas.
 - **Exports** — PNG (with scale), SVG, and JSON; import JSON documents back anytime.
 - **Autosave** — changes are persisted automatically and restored on the next visit.
+- **Real-time collaboration** — share an invite link and draw together live. Peers see each other's changes instantly, presence shows who's in the room, and the room state is handed to late joiners on arrival.
+- **Live cursors** — every collaborator's pointer is rendered on the canvas with their name, anchored to the board across different pan/zoom views.
 
 ## 🚀 Getting Started
 
@@ -45,18 +47,22 @@ npm run dev
 
 Then open the URL printed by Vite (default `http://localhost:5173`).
 
-### Production build
+### Real-time collaboration
+
+Start the relay server in a second terminal (it needs to be reachable by every participant, e.g. a machine on your LAN or a small VPS):
 
 ```bash
-npm run build      # type-checks + bundles into dist/
-npm run preview    # serve the production build locally
+npm run server      # WebSocket relay on ws://0.0.0.0:8787
 ```
+
+Then hit the **Share** button (top bar) to start a session and copy the invite link — anyone who opens it joins the same room automatically. Override the relay URL with the `VITE_WS_URL` env var if it doesn't run on `localhost:8787`.
 
 ## 🧰 Scripts
 
 | Command            | Description                              |
 | ------------------ | ---------------------------------------- |
 | `npm run dev`      | Start the Vite dev server with HMR       |
+| `npm run server`   | Start the realtime collaboration relay   |
 | `npm run build`    | Type-check (`tsc -b`) and build for prod |
 | `npm run preview`  | Preview the production build             |
 | `npm run lint`     | Lint with Oxlint                         |
@@ -67,6 +73,7 @@ npm run preview    # serve the production build locally
 - **[Vite](https://vite.dev)** — build tooling
 - **[Zustand](https://github.com/pmndrs/zustand)** — lightweight global state
 - **[Oxlint](https://oxc.rs)** — linting
+- **[ws](https://github.com/websockets/ws)** — WebSocket relay for realtime collaboration
 - Custom **Canvas 2D renderer** — hand-drawn geometry, arrows, selection overlays, and zoom/pan are all implemented from scratch (no canvas library)
 
 ## ⌨️ Keyboard Shortcuts
@@ -107,4 +114,4 @@ src/
 
 - **Add a tool** — create a class implementing the `Tool` interface in `src/tools/` and register it in `src/tools/index.ts`.
 - **Add a template** — append to the `templates` array in `src/templates/index.ts`.
-- **Realtime collaboration** — `src/core/sync.ts` ships with a local-only `SyncBackend` interface; plug in a WebSocket / CRDT backend without touching the rest of the app.
+- **Realtime collaboration** — the app talks to the relay through the `SyncBackend` interface in `src/core/sync.ts`; swap in a WebSocket / CRDT backend without touching the rest of the app. The relay itself is `server/index.mjs`.

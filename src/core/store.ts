@@ -204,6 +204,7 @@ export const useStore = create<WhiteboardState>()((set, get) => {
         return next;
       });
       save();
+      sync.publish(get().doc);
     },
 
     setView: (patch) => {
@@ -443,6 +444,7 @@ export const useStore = create<WhiteboardState>()((set, get) => {
     setCanvasName: (name) => {
       set((s) => ({ doc: { ...s.doc, scene: { ...s.doc.scene, name } }, saveStatus: "dirty" }));
       save();
+      sync.publish(get().doc);
     },
 
     resetFromDocument: (doc) => {
