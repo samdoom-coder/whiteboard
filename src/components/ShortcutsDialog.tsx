@@ -4,7 +4,7 @@ import { Icon } from "./Icon";
 import { toolDefinitions } from "../tools";
 
 const rows: Array<[string, string]> = [
-  ["V / R / E / D / L / A / P / T / H", "Switch tool"],
+  ["V / R / E / D / L / A / P / T / S / H", "Switch tool"],
   ["R again while Rectangle is active", "Toggle rounded rectangle"],
   ["Space (hold)", "Pan the canvas"],
   ["Middle mouse / wheel pan", "Pan the canvas"],

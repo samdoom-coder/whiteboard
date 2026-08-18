@@ -122,6 +122,7 @@ export const shapeLocalGeometry = (el: ShapeElement) => {
     case "roundedRectangle":
     case "text":
     case "image":
+    case "sticky":
       return {
         cx,
         cy,

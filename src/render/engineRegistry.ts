@@ -1,4 +1,4 @@
-import type { CanvasEngine } from "../render/engine";
+import type { CanvasEngine } from "./engine";
 
 let engine: CanvasEngine | null = null;
 

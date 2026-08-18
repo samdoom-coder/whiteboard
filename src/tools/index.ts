@@ -5,6 +5,7 @@ import { ShapeTool } from "./ShapeTool";
 import { LineArrowTool } from "./LineArrowTool";
 import { PencilTool } from "./PencilTool";
 import { TextTool } from "./TextTool";
+import { StickyTool } from "./StickyTool";
 import { EraserTool } from "./EraserTool";
 import { HandTool } from "./HandTool";
 import { ImageTool } from "./ImageTool";
@@ -21,6 +22,7 @@ register(new LineArrowTool("line"));
 register(new LineArrowTool("arrow"));
 register(new PencilTool());
 register(new TextTool());
+register(new StickyTool());
 register(new ImageTool());
 register(new EraserTool());
 register(new HandTool());
@@ -42,6 +44,7 @@ export const toolDefinitions: Array<{
   { id: "arrow", label: "Arrow", icon: "arrow", shortcut: "A" },
   { id: "pencil", label: "Pencil", icon: "pencil", shortcut: "P" },
   { id: "text", label: "Text", icon: "text", shortcut: "T" },
+  { id: "sticky", label: "Sticky note", icon: "sticky", shortcut: "S" },
   { id: "image", label: "Image", icon: "image", shortcut: "" },
   { id: "eraser", label: "Eraser", icon: "eraser", shortcut: "" },
   { id: "hand", label: "Hand", icon: "hand", shortcut: "H" },

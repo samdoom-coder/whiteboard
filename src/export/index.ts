@@ -1,9 +1,9 @@
-import type { Document, Element, ExportSettings, ImageElement, LineElement, Point, ShapeElement, TextElement, Theme } from "../types";
+import type { Document, Element, ExportSettings, ImageElement, LineElement, Point, ShapeElement, StickyElement, TextElement, Theme } from "../types";
 import { boundsFromElements } from "../render/geometry";
 import { genRoughShape, roughLinePoints, smoothPencil } from "../render/rough";
-import { resolveLineEndpoints, getImage, drawElement } from "../render/renderer";
+import { resolveLineEndpoints, getImage, drawElement, STICKY_PAD, wrapTextLines } from "../render/renderer";
 import { arrowhead } from "../render/geometry";
-import { palettes } from "../util/color";
+import { palettes, shade } from "../util/color";
 
 const OFFSET = 20;
 
@@ -109,6 +109,43 @@ const shapeSvg = (el: Element): string[] => {
     parts.push(
       `${wrap}<image href="${ie.dataURL}" x="${el.x}" y="${el.y}" width="${el.width}" height="${el.height}" opacity="${el.opacity}"/>${close}`,
     );
+    return parts;
+  }
+
+  if (el.type === "sticky") {
+    const se = el as StickyElement;
+    const rough = genRoughShape(el as ShapeElement);
+    const fill = se.backgroundColor && se.backgroundColor !== "transparent" ? se.backgroundColor : "#ffd43b";
+    const f = Math.max(10, Math.min(22, el.width * 0.22, el.height * 0.22));
+    const darker = shade(fill, -0.12);
+    let stickySvg = "";
+    if (se.fillStyle === "solid" || !rough.hachure.length) {
+      stickySvg += `<path d="${pathFromPoints(rough.fillPolygon, true)}" fill="${fill}" opacity="${el.opacity}"/>`;
+    } else {
+      const lines = [...rough.hachure, ...rough.crosshatch];
+      stickySvg += `<clipPath id="clip-${el.id}"><path d="${pathFromPoints(rough.fillPolygon, true)}"/></clipPath>`;
+      stickySvg += `<g clip-path="url(#clip-${el.id})">${lines
+        .map((l) => `<path d="${pathFromPoints(l)}" stroke="${fill}" stroke-width="1.4" opacity="${el.opacity}" fill="none"/>`)
+        .join("")}</g>`;
+    }
+    stickySvg += `<path d="${pathFromPoints(rough.outline, true)}" fill="none" stroke="${el.strokeColor}" stroke-width="${el.strokeWidth}" stroke-linejoin="round" stroke-linecap="round" opacity="${el.opacity}"/>`;
+    stickySvg += `<path d="M ${(el.x + el.width).toFixed(2)} ${el.y.toFixed(2)} L ${(el.x + el.width - f).toFixed(2)} ${el.y.toFixed(2)} L ${(el.x + el.width).toFixed(2)} ${(el.y + f).toFixed(2)} Z" fill="${darker}" opacity="${el.opacity}"/>`;
+    stickySvg += `<path d="M ${(el.x + el.width - f).toFixed(2)} ${el.y.toFixed(2)} L ${(el.x + el.width).toFixed(2)} ${(el.y + f).toFixed(2)}" stroke="${darker}" stroke-width="1" opacity="${el.opacity}"/>`;
+    if (se.text) {
+      const lines = wrapTextLines(se.text, Math.max(60, el.width - STICKY_PAD * 2));
+      const lh = se.fontSize * 1.25;
+      const anchor = se.textAlign === "right" ? "end" : se.textAlign === "center" ? "middle" : "start";
+      let tx = el.x + STICKY_PAD;
+      if (se.textAlign === "center") tx = el.x + el.width / 2;
+      else if (se.textAlign === "right") tx = el.x + el.width - STICKY_PAD;
+      let textSvg = `<text x="${tx.toFixed(2)}" y="${(el.y + STICKY_PAD).toFixed(2)}" font-size="${se.fontSize}" font-family="${se.fontFamily}" font-weight="${se.textBold ? 700 : 400}" fill="${se.strokeColor}" opacity="${el.opacity}" text-anchor="${anchor}">`;
+      lines.forEach((line, i) => {
+        textSvg += `<tspan x="${tx.toFixed(2)}" dy="${i === 0 ? 0 : lh}">${esc(line) || " "}</tspan>`;
+      });
+      textSvg += `</text>`;
+      stickySvg += textSvg;
+    }
+    parts.push(wrap + stickySvg + close);
     return parts;
   }
 

@@ -18,11 +18,11 @@ export function Toolbar() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const groups: Array<Array<typeof toolDefinitions[number]>> = [
-    toolDefinitions.slice(0, 1), // selection
-    toolDefinitions.slice(1, 5), // shapes
-    toolDefinitions.slice(5, 8), // line, arrow, pencil
-    toolDefinitions.slice(8, 10), // text, image
-    toolDefinitions.slice(10), // eraser, hand
+    toolDefinitions.filter((t) => t.id === "selection"),
+    toolDefinitions.filter((t) => ["rectangle", "roundedRectangle", "ellipse", "diamond"].includes(t.id)),
+    toolDefinitions.filter((t) => ["line", "arrow", "pencil"].includes(t.id)),
+    toolDefinitions.filter((t) => ["text", "sticky", "image"].includes(t.id)),
+    toolDefinitions.filter((t) => ["eraser", "hand"].includes(t.id)),
   ];
 
   const onImage = async (file: File | null) => {

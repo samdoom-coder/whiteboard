@@ -48,6 +48,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       { id: "diamond", title: "Create diamond", keywords: "diamond rhombus", icon: "diamond", action: () => s.setTool("diamond") },
       { id: "arrow", title: "Create arrow", keywords: "arrow line connector", icon: "arrow", action: () => s.setTool("arrow") },
       { id: "text", title: "Add text", keywords: "text label", icon: "text", action: () => s.setTool("text") },
+      { id: "sticky", title: "Add sticky note", keywords: "sticky note post-it label", icon: "sticky", action: () => s.setTool("sticky") },
       { id: "image", title: "Insert image…", keywords: "image picture photo", icon: "image", action: pickImage },
       { id: "pencil", title: "Draw freehand", keywords: "pencil sketch draw pen", icon: "pencil", action: () => s.setTool("pencil") },
       { id: "hand", title: "Pan (hand tool)", keywords: "hand pan move", icon: "hand", action: () => s.setTool("hand") },

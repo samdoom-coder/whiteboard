@@ -165,6 +165,12 @@ export const genRoughShape = (el: ShapeElement): RoughShape => {
       fillPolygon = rectOutline(el.x, el.y, w, h, r * 0.98);
       break;
     }
+    case "sticky": {
+      const r = Math.min(14, w * 0.08, h * 0.08);
+      base = rectOutline(el.x, el.y, w, h, r);
+      fillPolygon = rectOutline(el.x, el.y, w, h, r * 0.98);
+      break;
+    }
     case "ellipse": {
       const cx = el.x + w / 2;
       const cy = el.y + h / 2;

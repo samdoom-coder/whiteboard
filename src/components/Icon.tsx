@@ -41,6 +41,12 @@ const paths: Record<string, React.ReactNode> = {
     </>
   ),
   text: <path d="M5 5h14M12 5v14M8 19h8" />,
+  sticky: (
+    <>
+      <path d="M6 4h9l3 3v13H6z" />
+      <path d="M15 4v3h3" />
+    </>
+  ),
   image: (
     <>
       <rect x="3" y="4" width="18" height="16" rx="2" />

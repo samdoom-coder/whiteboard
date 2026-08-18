@@ -115,6 +115,17 @@ export const mix = (c1: string, c2: string, t: number): string => {
   return `rgb(${r},${g},${b})`;
 };
 
+/** Lighten (amt > 0) or darken (amt < 0) a hex color. Falls back to the input if not hex. */
+export const shade = (hex: string, amt: number): string => {
+  if (!hex || hex[0] !== "#" || hex.length < 7) return hex;
+  const step = (c: number) => Math.max(0, Math.min(255, Math.round(c + 255 * amt)));
+  const r = step(parseInt(hex.slice(1, 3), 16));
+  const g = step(parseInt(hex.slice(3, 5), 16));
+  const b = step(parseInt(hex.slice(5, 7), 16));
+  if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return hex;
+  return `rgb(${r},${g},${b})`;
+};
+
 /** Curated hand-picked palette for fills/strokes. */
 export const elementColors = {
   strokes: [

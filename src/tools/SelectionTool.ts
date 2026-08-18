@@ -223,7 +223,7 @@ export class SelectionTool extends BaseTool {
   onClick(_ctx: ToolContext, p: CanvasPointer) {
     const s = useStore.getState();
     const hit = hitTestElements(s.doc.elements, { x: p.wx, y: p.wy });
-    if (hit && hit.type === "text") {
+    if (hit && (hit.type === "text" || hit.type === "sticky")) {
       const now = Date.now();
       if (this.lastClick && this.lastClick.id === hit.id && now - this.lastClick.time < 500) {
         s.setEditingText(hit.id);
@@ -241,7 +241,7 @@ export class SelectionTool extends BaseTool {
     const hit = hitTestElements(s.doc.elements, { x: p.wx, y: p.wy });
     if (hit) {
       s.select([hit.id]);
-      if (hit.type === "text") {
+      if (hit.type === "text" || hit.type === "sticky") {
         s.setEditingText(hit.id);
         return;
       }

@@ -1,8 +1,8 @@
 import { useStore } from "../core/store";
-import type { Element, FillStyle, StrokeStyle, TextElement } from "../types";
+import type { Element, FillStyle, StickyElement, StrokeStyle, TextElement } from "../types";
 import { elementColors } from "../util/color";
 import { textFonts } from "../util/font";
-import { resizeTextElement } from "../render/renderer";
+import { fitStickyElement, resizeTextElement } from "../render/renderer";
 import { Icon } from "./Icon";
 
 const strokeSwatches = elementColors.strokes;
@@ -37,7 +37,9 @@ export function StylePanelContent() {
   const hasSelection = selected.length > 0;
   const source = hasSelection ? selected[0] : activeStyle;
   const isText = hasSelection && selected[0].type === "text";
-  const textEl = isText ? (selected[0] as TextElement) : null;
+  const isSticky = hasSelection && selected[0].type === "sticky";
+  const isTextEl = isText || isSticky;
+  const textEl = isTextEl ? (selected[0] as TextElement | StickyElement) : null;
 
   const apply = (style: StylePatch) => {
     // choosing a fill color should fill solid by default
@@ -61,11 +63,12 @@ export function StylePanelContent() {
     const s = useStore.getState();
     s.beginGesture();
     const ids = new Set(s.selectedIds);
-    const next = s.doc.elements.map((el) =>
-      ids.has(el.id) && el.type === "text"
-        ? resizeTextElement({ ...(el as TextElement), ...patch })
-        : el,
-    );
+    const next = s.doc.elements.map((el) => {
+      if (!ids.has(el.id)) return el;
+      if (el.type === "text") return resizeTextElement({ ...(el as TextElement), ...patch });
+      if (el.type === "sticky") return fitStickyElement({ ...(el as StickyElement), ...patch });
+      return el;
+    });
     s.setElementsLive(next);
     s.commit();
   };
@@ -92,7 +95,7 @@ export function StylePanelContent() {
         </div>
       )}
 
-      {isText && textEl && (
+      {isTextEl && textEl && (
         <div className="style-section">
           <span className="style-label">Text font</span>
           <div className="font-list">

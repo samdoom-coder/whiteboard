@@ -392,10 +392,11 @@ button {
 .style-panel {
   position: absolute;
   right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 14px;
   z-index: 35;
   width: 232px;
+  max-height: calc(100vh - 28px);
+  overflow-y: auto;
   padding: 12px;
   display: flex;
   flex-direction: column;

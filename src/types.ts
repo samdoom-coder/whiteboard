@@ -11,6 +11,7 @@ export type ToolType =
   | "pencil"
   | "text"
   | "image"
+  | "sticky"
   | "eraser"
   | "hand";
 
@@ -23,7 +24,8 @@ export type ElementType =
   | "arrow"
   | "pencil"
   | "text"
-  | "image";
+  | "image"
+  | "sticky";
 
 export type FillStyle = "solid" | "hachure" | "crosshatch";
 export type StrokeStyle = "solid" | "dashed" | "dotted";
@@ -70,7 +72,8 @@ export interface ShapeElement extends BaseElement {
     | "ellipse"
     | "diamond"
     | "text"
-    | "image";
+    | "image"
+    | "sticky";
 }
 
 export interface LineElement extends BaseElement {
@@ -102,12 +105,22 @@ export interface ImageElement extends ShapeElement {
   naturalHeight: number;
 }
 
+export interface StickyElement extends ShapeElement {
+  type: "sticky";
+  text: string;
+  fontSize: number;
+  fontFamily: string;
+  textAlign: "left" | "center" | "right";
+  textBold: boolean;
+}
+
 export type Element =
   | ShapeElement
   | LineElement
   | PencilElement
   | TextElement
-  | ImageElement;
+  | ImageElement
+  | StickyElement;
 
 export interface ViewState {
   scrollX: number;

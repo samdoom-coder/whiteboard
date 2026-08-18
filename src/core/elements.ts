@@ -5,6 +5,7 @@ import type {
   LineElement,
   PencilElement,
   Point,
+  StickyElement,
   TextElement,
 } from "../types";
 import { uid } from "../util/id";
@@ -126,6 +127,30 @@ export const makeText = (
   const m = measureText(text, fontSize, el.fontFamily, false);
   el.width = m.width;
   el.height = m.height;
+  return el;
+};
+
+export const STICKY_DEFAULT_COLOR = "#ffd43b";
+
+export const makeSticky = (
+  x: number,
+  y: number,
+  text: string,
+  style: Partial<ElementStyle> = {},
+  fontSize = 20,
+  width = 190,
+  height = 160,
+): StickyElement => {
+  const el = baseElement("sticky", x, y, {
+    ...style,
+    backgroundColor: STICKY_DEFAULT_COLOR,
+    fillStyle: "solid",
+  }, width, height) as StickyElement;
+  el.text = text;
+  el.fontSize = fontSize;
+  el.fontFamily = "Inter, system-ui, sans-serif";
+  el.textAlign = "left";
+  el.textBold = false;
   return el;
 };
 
