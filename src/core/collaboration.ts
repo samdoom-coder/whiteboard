@@ -52,12 +52,25 @@ export const getClientId = (): string => {
 const defaultName = () =>
   `User-${Math.floor(1000 + Math.random() * 9000)}`;
 
-/** WebSocket URL for the collaboration relay. Override with VITE_WS_URL. */
-export const getWsUrl = (): string => {
-  const envUrl = (import.meta.env?.VITE_WS_URL as string | undefined)?.trim();
-  if (envUrl) return envUrl;
+/**
+ * Candidate WebSocket URLs for the collaboration relay, best first.
+ * Override with VITE_WS_URL (build-time). In production the relay shares the
+ * app's origin (server/prod.mjs), so same-origin is tried first — that's how
+ * Render deploys, where all public traffic lands on one port. The dedicated
+ * `:8787` port is kept as a fallback for other setups.
+ */
+export const getWsUrls = (): string[] => {
+  const envUrl = (import.meta.env.VITE_WS_URL as string | undefined)?.trim();
   const proto = location.protocol === "https:" ? "wss:" : "ws:";
-  return `${proto}//${location.hostname}:8787`;
+  if (envUrl) return [envUrl];
+  if (import.meta.env.PROD) {
+    return [
+      `${proto}//${location.host}`,
+      `${proto}//${location.hostname}:8787`,
+    ];
+  }
+  // Dev: Vite serves the app; the relay runs separately on 8787.
+  return [`${proto}//${location.hostname}:8787`];
 };
 
 export interface CursorEntry {
@@ -127,7 +140,7 @@ export const useCollab = create<CollabState>()((set, get) => {
       if (get().status === "connected" && get().roomId === id) return;
 
       set({ roomId: id, error: null, cursors: {} });
-      const backend = createWebSocketBackend(getWsUrl(), getClientId(), get().name);
+      const backend = createWebSocketBackend(getWsUrls(), getClientId(), get().name);
       sync.attach(backend);
 
       backend.connect(id, {

@@ -81,11 +81,11 @@ export const sync: SyncLayer = new LocalSync();
  * and reports presence + connection status to the collaboration UI.
  */
 export const createWebSocketBackend = (
-  url: string,
+  urls: string[],
   clientId: string,
   name: string,
 ): SyncBackend => {
-  return new WebSocketBackend(url, clientId, name);
+  return new WebSocketBackend(urls, clientId, name);
 };
 
 class WebSocketBackend implements SyncBackend {
@@ -97,12 +97,14 @@ class WebSocketBackend implements SyncBackend {
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private closedByUser = false;
-  private url: string;
+  private urls: string[];
+  private urlIndex = 0;
+  private hasConnected = false;
   private clientId: string;
   private name: string;
 
-  constructor(url: string, clientId: string, name: string) {
-    this.url = url;
+  constructor(urls: string[], clientId: string, name: string) {
+    this.urls = urls;
     this.clientId = clientId;
     this.name = name;
   }
@@ -112,6 +114,8 @@ class WebSocketBackend implements SyncBackend {
     this.callbacks = callbacks;
     this.closedByUser = false;
     this.reconnectAttempts = 0;
+    this.urlIndex = 0;
+    this.hasConnected = false;
     this.open();
   }
 
@@ -144,9 +148,11 @@ class WebSocketBackend implements SyncBackend {
   private open() {
     this.setStatus("connecting");
 
+    const url = this.urls[this.urlIndex % this.urls.length];
+
     let ws: WebSocket;
     try {
-      ws = new WebSocket(this.url);
+      ws = new WebSocket(url);
     } catch {
       this.scheduleReconnect();
       return;
@@ -154,6 +160,8 @@ class WebSocketBackend implements SyncBackend {
     this.ws = ws;
 
     ws.onopen = () => {
+      this.hasConnected = true;
+      this.urlIndex = 0;
       this.reconnectAttempts = 0;
       ws.send(
         JSON.stringify({
@@ -213,6 +221,17 @@ class WebSocketBackend implements SyncBackend {
     ws.onclose = () => {
       this.ws = null;
       if (this.closedByUser) return;
+      // Never reached the relay on this candidate — try the next URL before
+      // falling back to the regular exponential-backoff reconnect.
+      if (!this.hasConnected && this.urlIndex + 1 < this.urls.length) {
+        this.urlIndex += 1;
+        this.reconnectAttempts = 0;
+        this.reconnectTimer = setTimeout(() => {
+          this.reconnectTimer = null;
+          if (!this.closedByUser) this.open();
+        }, 500);
+        return;
+      }
       this.setStatus("disconnected");
       this.scheduleReconnect();
     };
