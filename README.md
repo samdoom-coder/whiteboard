@@ -1,6 +1,8 @@
 # Whiteboard
 ![Description of image](Image.png)
 
+
+[![Node.js 20+.](https://img.shields.io/badge/node-20+-red.svg)](https://nodejs.org/en/download)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/samdoom-coder/whiteboard/blob/main/LICENSE)
 
 A fast, client-side whiteboarding app with a hand-drawn aesthetic. Sketch shapes, connect arrows, drop in images, and turn plain-text ideas into structured diagrams — all in your browser.
