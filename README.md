@@ -20,7 +20,7 @@ Everything runs locally in your browser. Documents are autosaved to `localStorag
 - **Images** — upload, drag & drop, or paste image files straight onto the canvas.
 
 ### Canvas
-- **Infinite canvas** — scroll, pan (wheel, space-drag, middle-mouse, touch), pinch-to-zoom, and trackpad zoom.
+- **Infinite canvas** — scroll, pan (wheel, space-drag, middle-mouse, two-finger touch), pinch-to-zoom, and trackpad zoom. On touch screens one finger draws with the active tool and two fingers pan/zoom.
 - **Backgrounds** — plain, grid, or dots, with a palette of colors.
 - **Smart contrast** — grid lines, dots, and the default drawing color automatically switch between light and dark to stay readable on whatever background you choose.
 - **Dark / light mode** — the entire UI themes cleanly, including the tool palette and menus.

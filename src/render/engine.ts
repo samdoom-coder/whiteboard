@@ -304,8 +304,7 @@ export class CanvasEngine {
   private drawBackground(
     ctx: CanvasRenderingContext2D,
     view: ViewState,
-  ) {
-    const state = useStore.getState();
+  ) {    const state = useStore.getState();
     const bg = state.doc.scene.background;
     const { zoom, scrollX, scrollY } = view;
 
@@ -456,19 +455,20 @@ export class CanvasEngine {
 
     const state = useStore.getState();
     this.downPointer = p;
+    // One-finger touch draws with drawing tools (shapes, lines, pencil,
+    // text, sticky, image, eraser, laser) and pans with selection/hand —
+    // same split as the desktop mouse. Two-finger pinch always pans/zooms.
+    const touchDraws =
+      p.pointerType === "touch" && state.tool !== "selection" && state.tool !== "hand";
     if (
       this.spaceHeld ||
       p.button === 1 ||
       state.tool === "hand" ||
-      p.pointerType === "touch"
+      (p.pointerType === "touch" && !touchDraws)
     ) {
-      if (p.pointerType === "touch" && !this.spaceHeld && state.tool !== "hand") {
-        // touch drag always pans unless drawing tool
-        if (state.tool !== "selection" && state.tool !== "text" && state.tool !== "pencil" && state.tool !== "eraser") {
-          // allow drawing tools on touch
-        } else {
-          this.panningViaSpace = true;
-        }
+      if (p.pointerType === "touch" && !this.spaceHeld && state.tool !== "hand" && !touchDraws) {
+        // one-finger drag pans with the selection tool
+        this.panningViaSpace = true;
       }
       if (p.button === 1) this.panningViaMiddle = true;
       if (this.spaceHeld || state.tool === "hand") this.panningViaSpace = true;
