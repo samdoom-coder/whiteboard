@@ -9,6 +9,7 @@ import { StickyTool } from "./StickyTool";
 import { EraserTool } from "./EraserTool";
 import { HandTool } from "./HandTool";
 import { ImageTool } from "./ImageTool";
+import { LaserTool } from "./LaserTool";
 
 const toolMap = new Map<ToolType, Tool>();
 const register = (t: Tool) => toolMap.set(t.id, t);
@@ -26,6 +27,7 @@ register(new StickyTool());
 register(new ImageTool());
 register(new EraserTool());
 register(new HandTool());
+register(new LaserTool());
 
 export const tools: ReadonlyMap<ToolType, Tool> = toolMap;
 
@@ -37,7 +39,7 @@ export const toolDefinitions: Array<{
 }> = [
   { id: "selection", label: "Selection", icon: "cursor", shortcut: "V" },
   { id: "rectangle", label: "Rectangle", icon: "rect", shortcut: "R" },
-  { id: "roundedRectangle", label: "Rounded rectangle", icon: "rounded-rect", shortcut: "R" },
+  { id: "roundedRectangle", label: "Rounded rectangle", icon: "rounded-rect", shortcut: "U" },
   { id: "ellipse", label: "Ellipse", icon: "ellipse", shortcut: "E" },
   { id: "diamond", label: "Diamond", icon: "diamond", shortcut: "D" },
   { id: "line", label: "Line", icon: "line", shortcut: "L" },
@@ -48,4 +50,12 @@ export const toolDefinitions: Array<{
   { id: "image", label: "Image", icon: "image", shortcut: "" },
   { id: "eraser", label: "Eraser", icon: "eraser", shortcut: "" },
   { id: "hand", label: "Hand", icon: "hand", shortcut: "H" },
+  { id: "laser", label: "Laser pointer", icon: "laser", shortcut: "K" },
 ];
+
+/**
+ * Tools hidden behind the toolbar's "more" (⋯) menu instead of the main
+ * tool strip. Add future extra tools here — the toolbar renders them in
+ * the overflow popover automatically.
+ */
+export const overflowToolIds: ToolType[] = ["laser"];

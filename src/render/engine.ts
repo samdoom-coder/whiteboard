@@ -7,6 +7,7 @@ import { drawSelectionOverlay } from "./selectionOverlay";
 import { elementBounds, boundsFromElements } from "./geometry";
 import type { Tool } from "../tools/Tool";
 import { tools } from "../tools";
+import { LASER_FADE_MS, getLaserCursor, getLaserTrails, laserSetCursor } from "../core/laser";
 
 export interface CanvasPointer {
   sx: number;
@@ -179,6 +180,8 @@ export class CanvasEngine {
       ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
       this.drawMarquee(ctx, this.marquee, state.theme);
     }
+
+    this.drawLaser(ctx, view);
   }
 
   private marquee: { x: number; y: number; w: number; h: number } | null = null;
@@ -206,6 +209,94 @@ export class CanvasEngine {
     ctx.rect(r.x, r.y, r.w, r.h);
     ctx.fill();
     ctx.stroke();
+    ctx.restore();
+  }
+
+  /** Glowing ephemeral laser trails + cursor dot (never persisted). */
+  private drawLaser(ctx: CanvasRenderingContext2D, view: ViewState) {
+    const trails = getLaserTrails();
+    const cursor = getLaserCursor();
+    const isLaserTool = useStore.getState().tool === "laser";
+    if (!trails.length && !(isLaserTool && cursor.visible)) return;
+
+    const now = Date.now();
+    ctx.save();
+    ctx.setTransform(
+      this.dpr * view.zoom,
+      0,
+      0,
+      this.dpr * view.zoom,
+      this.dpr * view.scrollX,
+      this.dpr * view.scrollY,
+    );
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    for (const trail of trails) {
+      if (!trail.points.length) continue;
+      ctx.save();
+      // Stamp filled circles (no shadowBlur, no per-segment strokes) so the
+      // trail is one smooth glowing line with no dots/gaps at joints.
+      // Points are interpolated to keep stamps densely overlapping even on
+      // fast strokes.
+      ctx.fillStyle = "#ff2e2e";
+      const step = 1.6 / view.zoom;
+      const stamp = (x: number, y: number, alpha: number) => {
+        const a = Math.max(0, Math.min(1, alpha));
+        if (a <= 0) return;
+        const coreR = (0.9 + 1.0 * a) / view.zoom;
+        // tight, subtle halo only — keeps the beam crisp, not blurry
+        const glowR = coreR * 1.6;
+        ctx.globalAlpha = 0.1 * a;
+        ctx.beginPath();
+        ctx.arc(x, y, glowR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = a;
+        ctx.beginPath();
+        ctx.arc(x, y, coreR, 0, Math.PI * 2);
+        ctx.fill();
+      };
+      if (trail.points.length === 1) {
+        const pt = trail.points[0];
+        stamp(pt.x, pt.y, 1 - (now - pt.t) / LASER_FADE_MS);
+      } else {
+        for (let i = 1; i < trail.points.length; i++) {
+          const a = trail.points[i - 1];
+          const b = trail.points[i];
+          const dist = Math.hypot(b.x - a.x, b.y - a.y);
+          const steps = Math.max(1, Math.ceil(dist / step));
+          for (let s = 1; s <= steps; s++) {
+            const f = s / steps;
+            const x = a.x + (b.x - a.x) * f;
+            const y = a.y + (b.y - a.y) * f;
+            const t = a.t + (b.t - a.t) * f;
+            stamp(x, y, 1 - (now - t) / LASER_FADE_MS);
+          }
+        }
+        // make sure the very first point is painted too
+        const first = trail.points[0];
+        stamp(first.x, first.y, 1 - (now - first.t) / LASER_FADE_MS);
+      }
+      ctx.restore();
+    }
+
+    // live dot follows the pointer while the laser tool is active
+    if (isLaserTool && cursor.visible) {
+      ctx.save();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#ff2e2e";
+      ctx.shadowColor = "rgba(255,46,46,0.9)";
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(cursor.x, cursor.y, 4.5 / view.zoom, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(cursor.x, cursor.y, 1.5 / view.zoom, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
     ctx.restore();
   }
 
@@ -445,6 +536,9 @@ export class CanvasEngine {
       }
       const tool = this.activeTool;
       tool?.onPointerMove(this.toolCtx(), p);
+    } else if (useStore.getState().tool === "laser") {
+      // hover dot while the laser tool is active (no button pressed)
+      laserSetCursor(p.wx, p.wy);
     }
   }
 

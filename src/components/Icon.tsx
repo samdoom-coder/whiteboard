@@ -189,6 +189,20 @@ const paths: Record<string, React.ReactNode> = {
       <path d="M8 3v5h7V3M8 21v-7h8v7" />
     </>
   ),
+  laser: (
+    <>
+      <path d="M3 21c4-1 6.5-3 9.5-6.5" />
+      <circle cx="16.5" cy="7.5" r="2.6" fill="currentColor" stroke="none" />
+      <path d="M16.5 1.8v2.2M21.2 7.5h-2.2M19.9 4.1l-1.5 1.5M13.1 4.1l1.5 1.5" />
+    </>
+  ),
+  more: (
+    <>
+      <circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+      <circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none" />
+    </>
+  ),
 };
 
 export const Icon = ({ name, ...rest }: IconProps & { name: string }) => (

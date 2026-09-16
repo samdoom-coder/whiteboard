@@ -44,9 +44,12 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
     };
     return [
       { id: "rect", title: "Create rectangle", keywords: "rect shape box", icon: "rect", action: () => s.setTool("rectangle") },
+      { id: "rounded-rect", title: "Create rounded rectangle", keywords: "rounded rect shape box", icon: "rounded-rect", action: () => s.setTool("roundedRectangle") },
       { id: "ellipse", title: "Create ellipse", keywords: "ellipse circle oval", icon: "ellipse", action: () => s.setTool("ellipse") },
       { id: "diamond", title: "Create diamond", keywords: "diamond rhombus", icon: "diamond", action: () => s.setTool("diamond") },
+      { id: "line", title: "Create line", keywords: "line straight", icon: "line", action: () => s.setTool("line") },
       { id: "arrow", title: "Create arrow", keywords: "arrow line connector", icon: "arrow", action: () => s.setTool("arrow") },
+      { id: "laser", title: "Laser pointer", keywords: "laser pointer present highlight", icon: "laser", action: () => s.setTool("laser") },
       { id: "text", title: "Add text", keywords: "text label", icon: "text", action: () => s.setTool("text") },
       { id: "sticky", title: "Add sticky note", keywords: "sticky note post-it label", icon: "sticky", action: () => s.setTool("sticky") },
       { id: "image", title: "Insert image…", keywords: "image picture photo", icon: "image", action: pickImage },

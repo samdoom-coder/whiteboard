@@ -110,11 +110,7 @@ export function useKeyboardShortcuts(): UIState {
       // tool shortcuts
       const tool = toolDefinitions.find((t) => t.shortcut && t.shortcut.toUpperCase() === e.key.toUpperCase());
       if (tool) {
-        if (e.key === "r" && s.tool === "rectangle") {
-          s.setTool("roundedRectangle");
-        } else {
-          s.setTool(tool.id);
-        }
+        s.setTool(tool.id);
         return;
       }
 

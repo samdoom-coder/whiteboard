@@ -1446,3 +1446,76 @@ input[type="color"]::-webkit-color-swatch {
     transform: scale(1);
   }
 }
+
+/* ---------- toolbar overflow ("more tools") ---------- */
+.toolbar-more-wrap {
+  position: relative;
+}
+
+.toolbar-more-popover {
+  position: absolute;
+  left: calc(100% + 12px);
+  bottom: 0;
+  min-width: 210px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 70;
+  animation: panel-in 0.14s ease-out;
+}
+
+.toolbar-more-popover.mobile {
+  left: auto;
+  right: 0;
+  bottom: calc(100% + 12px);
+}
+
+.more-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.more-item:hover {
+  background: var(--surface-hover);
+}
+
+.more-item.active {
+  background: var(--tool-accent-soft);
+  color: var(--tool-accent);
+}
+
+.more-item-label {
+  flex: 1;
+}
+
+.more-item kbd {
+  margin-left: 8px;
+}
+
+.more-active-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tool-accent);
+}
+
+.toolbar .btn.open {
+  background: var(--surface-hover);
+  color: var(--text);
+}

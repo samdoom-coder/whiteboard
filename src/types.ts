@@ -13,7 +13,8 @@ export type ToolType =
   | "image"
   | "sticky"
   | "eraser"
-  | "hand";
+  | "hand"
+  | "laser";
 
 export type ElementType =
   | "rectangle"
