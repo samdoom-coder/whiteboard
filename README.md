@@ -12,7 +12,7 @@ Everything runs locally in your browser. Documents are autosaved to `localStorag
 ## ✨ Features
 
 ### Drawing
-- **12 tools** — selection, rectangle, rounded rectangle, ellipse, diamond, line, arrow, pencil (freehand), text, image, eraser, and pan/hand.
+- **13 tools** — selection, rectangle, rounded rectangle, ellipse, diamond, line, arrow, pencil (freehand), text, image, eraser, and pan/hand, plus a **laser pointer** (`K`, in the ⋯ overflow menu) that draws glowing trails which fade tail-first after ~2s and are never saved to the canvas.
 - **Hand-drawn rendering** — organic, sketch-style strokes with adjustable roughness for that whiteboard feel.
 - **Connectors that stick** — arrows bind to shapes and stay attached as you move or resize them.
 - **Rich styling** — per-element stroke color, fill color, fill style (solid / hachure / crosshatch), stroke width, line style (solid / dashed / dotted), opacity, and roughness.
@@ -31,12 +31,12 @@ Everything runs locally in your browser. Documents are autosaved to `localStorag
 - **Copy / paste / duplicate**.
 - **Command palette** (`Ctrl/⌘ + K`) and a full set of **keyboard shortcuts**.
 - **Minimap** for navigating large boards.
-- **Templates** — jump-start with AWS Architecture, System Architecture, ER Diagram, Flowchart, Mind Map, Mobile Wireframe, or Business Process diagrams.
 - **AI assistant** — describe a system in plain English (e.g. *"mobile app → API gateway → backend with PostgreSQL, Redis, S3"*) and it generates an architecture diagram on the canvas.
 - **Exports** — PNG (with scale), SVG, and JSON; import JSON documents back anytime.
 - **Autosave** — changes are persisted automatically and restored on the next visit.
 - **Real-time collaboration** — share an invite link and draw together live. Peers see each other's changes instantly, presence shows who's in the room, and the room state is handed to late joiners on arrival.
 - **Live cursors** — every collaborator's pointer is rendered on the canvas with their name, anchored to the board across different pan/zoom views.
+- **Shared laser pointer** — laser strokes are broadcast live and rendered on everyone's canvas in the drawer's color, then fade away. Nothing is persisted.
 
 ## 🚀 Getting Started
 
@@ -83,9 +83,10 @@ Then hit the **Share** button (top bar) to start a session and copy the invite l
 | Action              | Shortcut                |
 | ------------------- | ----------------------- |
 | Selection           | `V`                     |
-| Shapes (rect / rounded / ellipse / diamond) | `R` `E` `D` |
+| Shapes (rect / rounded / ellipse / diamond) | `R` `U` `E` `D` |
 | Line / Arrow        | `L` `A`                 |
 | Pencil / Text / Hand| `P` `T` `H`            |
+| Laser pointer       | `K`                     |
 | Undo / Redo         | `Ctrl/⌘ + Z` / `Ctrl/⌘ + Shift + Z` or `Ctrl/⌘ + Y` |
 | Duplicate           | `Ctrl/⌘ + D`            |
 | Copy / Paste        | `Ctrl/⌘ + C` / `Ctrl/⌘ + V` |
@@ -107,13 +108,11 @@ src/
 ├── hooks/         # Keyboard shortcut bindings
 ├── render/        # Canvas renderer, geometry, selection overlay, camera
 ├── styles/        # Global CSS (theme variables, layout, components)
-├── templates/     # Built-in diagram templates
 ├── tools/         # Per-tool interaction logic (pointer/keyboard)
 └── util/          # Color, fonts, ids, math helpers
 ```
 
 ## 🔌 Extending
 
-- **Add a tool** — create a class implementing the `Tool` interface in `src/tools/` and register it in `src/tools/index.ts`.
-- **Add a template** — append to the `templates` array in `src/templates/index.ts`.
+- **Add a tool** — create a class implementing the `Tool` interface in `src/tools/` and register it in `src/tools/index.ts`. To keep it out of the main strip, list its id in `overflowToolIds` and it appears in the toolbar's ⋯ menu instead.
 - **Realtime collaboration** — the app talks to the relay through the `SyncBackend` interface in `src/core/sync.ts`; swap in a WebSocket / CRDT backend without touching the rest of the app. The relay itself is `server/index.mjs`.

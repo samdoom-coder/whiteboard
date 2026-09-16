@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Document } from "../types";
 import { useStore } from "./store";
+import { clearRemoteLaser, peerColor, remoteLaserPoint } from "./laser";
 import {
   sync,
   createWebSocketBackend,
@@ -12,24 +13,7 @@ const NAME_KEY = "whiteboard:collab:name";
 const CLIENT_KEY = "whiteboard:collab:clientId";
 
 /** stable per-peer accent color derived from the client id */
-const CURSOR_COLORS = [
-  "#e03131",
-  "#f08c00",
-  "#2f9e44",
-  "#1971c2",
-  "#9c36b5",
-  "#0c8599",
-  "#e8590c",
-  "#5f3dc4",
-];
-
-const colorFor = (clientId: string): string => {
-  let h = 0;
-  for (let i = 0; i < clientId.length; i++) {
-    h = (h * 31 + clientId.charCodeAt(i)) >>> 0;
-  }
-  return CURSOR_COLORS[h % CURSOR_COLORS.length];
-};
+export const colorFor = peerColor;
 
 export const getClientId = (): string => {
   let id: string | null = null;
@@ -95,6 +79,10 @@ interface CollabState {
   inviteUrl: () => string;
   /** broadcast our pointer position (world coords), throttled */
   publishCursor: (x: number, y: number) => void;
+  /** broadcast a laser-pointer point (world coords), throttled */
+  publishLaser: (x: number, y: number, drawing: boolean) => void;
+  /** broadcast a laser-pointer point immediately (stroke start/end) */
+  publishLaserNow: (x: number, y: number, drawing: boolean) => void;
 }
 
 let pendingRemote: Document | null = null;
@@ -158,6 +146,9 @@ export const useCollab = create<CollabState>()((set, get) => {
         onPeersChange: (peers) => {
           set((s) => {
             const keep = new Set(peers.map((p) => p.clientId));
+            for (const id of Object.keys(s.cursors)) {
+              if (!keep.has(id)) clearRemoteLaser(id);
+            }
             const cursors = Object.fromEntries(
               Object.entries(s.cursors).filter(([id]) => keep.has(id)),
             );
@@ -179,6 +170,10 @@ export const useCollab = create<CollabState>()((set, get) => {
             },
           }));
         },
+        onLaser: (laser) => {
+          if (laser.clientId === getClientId()) return;
+          remoteLaserPoint(laser.clientId, laser.x, laser.y, laser.drawing);
+        },
         onStatusChange: (status) => set({ status }),
         onError: (message) => set({ error: message }),
       });
@@ -186,6 +181,7 @@ export const useCollab = create<CollabState>()((set, get) => {
 
     disconnect: () => {
       sync.detach();
+      clearRemoteLaser();
       set({ roomId: null, status: "local", peers: [], error: null, cursors: {} });
     },
 
@@ -203,6 +199,34 @@ export const useCollab = create<CollabState>()((set, get) => {
           flushCursor();
         }, CURSOR_MS);
       }
+    },
+
+    publishLaser: (x, y, drawing) => {
+      if (get().status !== "connected") return;
+      pendingLaser = { x, y, drawing };
+      const now = Date.now();
+      if (now - lastSentLaser >= LASER_MS) {
+        lastSentLaser = now;
+        flushLaser();
+      } else if (!laserTimer) {
+        laserTimer = setTimeout(() => {
+          laserTimer = null;
+          lastSentLaser = Date.now();
+          flushLaser();
+        }, LASER_MS);
+      }
+    },
+
+    publishLaserNow: (x, y, drawing) => {
+      if (get().status !== "connected") return;
+      // keep wire order: anything throttled earlier goes out first
+      flushLaser();
+      if (laserTimer) {
+        clearTimeout(laserTimer);
+        laserTimer = null;
+      }
+      lastSentLaser = Date.now();
+      sync.backend?.publishLaser(x, y, drawing);
     },
 
     setName: (raw) => {
@@ -245,6 +269,21 @@ const flushCursor = () => {
   const { x, y } = pendingCursor;
   pendingCursor = null;
   sync.backend?.publishCursor(x, y);
+};
+
+// laser broadcast throttling — same leading + trailing pattern as cursors,
+// but faster (30ms) so remote strokes stay smooth. Stroke start/end markers
+// go out immediately so short taps are never swallowed by the throttle.
+const LASER_MS = 30;
+let lastSentLaser = 0;
+let laserTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingLaser: { x: number; y: number; drawing: boolean } | null = null;
+
+const flushLaser = () => {
+  if (!pendingLaser) return;
+  const { x, y, drawing } = pendingLaser;
+  pendingLaser = null;
+  sync.backend?.publishLaser(x, y, drawing);
 };
 
 /** drop cursors from peers that went idle or disconnected */

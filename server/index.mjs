@@ -124,6 +124,24 @@ export function createRelay(server) {
         });
         return;
       }
+
+      if (msg.type === "laser") {
+        if (!ws.roomId) return;
+        const room = rooms.get(ws.roomId);
+        if (!room) return;
+        const x = Number(msg.x);
+        const y = Number(msg.y);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+        broadcast(room, ws, {
+          type: "laser",
+          clientId: ws.clientId,
+          name: ws.name,
+          x,
+          y,
+          drawing: msg.drawing === true,
+        });
+        return;
+      }
     });
 
     ws.on("close", () => {

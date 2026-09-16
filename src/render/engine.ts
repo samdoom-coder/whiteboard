@@ -238,8 +238,9 @@ export class CanvasEngine {
       // Stamp filled circles (no shadowBlur, no per-segment strokes) so the
       // trail is one smooth glowing line with no dots/gaps at joints.
       // Points are interpolated to keep stamps densely overlapping even on
-      // fast strokes.
-      ctx.fillStyle = "#ff2e2e";
+      // fast strokes. Remote peers' trails use their cursor color.
+      const color = trail.color ?? "#ff2e2e";
+      ctx.fillStyle = color;
       const step = 1.6 / view.zoom;
       const stamp = (x: number, y: number, alpha: number) => {
         const a = Math.max(0, Math.min(1, alpha));

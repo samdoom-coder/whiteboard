@@ -26,6 +26,16 @@ export interface RemoteCursor {
   y: number;
 }
 
+export interface RemoteLaser {
+  clientId: string;
+  name: string;
+  /** world coordinates on the shared canvas */
+  x: number;
+  y: number;
+  /** true while the peer is pressing with the laser tool; false ends the stroke */
+  drawing: boolean;
+}
+
 export interface SyncCallbacks {
   /** a peer published a new document state */
   onRemoteChange: (doc: Document) => void;
@@ -35,6 +45,8 @@ export interface SyncCallbacks {
   onPeersChange: (peers: CollabPeer[]) => void;
   /** a peer moved their cursor */
   onCursor?: (cursor: RemoteCursor) => void;
+  /** a peer drew with the laser pointer (ephemeral, never persisted) */
+  onLaser?: (laser: RemoteLaser) => void;
   onStatusChange: (status: SyncStatus) => void;
   onError?: (message: string) => void;
 }
@@ -44,6 +56,8 @@ export interface SyncBackend {
   publish(doc: Document): void;
   /** broadcast our pointer position (world coordinates) */
   publishCursor(x: number, y: number): void;
+  /** broadcast a laser-pointer point (world coordinates) */
+  publishLaser(x: number, y: number, drawing: boolean): void;
   disconnect(): void;
   status: SyncStatus;
 }
@@ -131,6 +145,12 @@ class WebSocketBackend implements SyncBackend {
     }
   }
 
+  publishLaser(x: number, y: number, drawing: boolean) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "laser", x, y, drawing }));
+    }
+  }
+
   disconnect() {
     this.closedByUser = true;
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
@@ -209,6 +229,21 @@ class WebSocketBackend implements SyncBackend {
               name: typeof msg.name === "string" ? msg.name : "Guest",
               x: msg.x,
               y: msg.y,
+            });
+          }
+          break;
+        case "laser":
+          if (
+            typeof msg.clientId === "string" &&
+            typeof msg.x === "number" &&
+            typeof msg.y === "number"
+          ) {
+            cb.onLaser?.({
+              clientId: msg.clientId,
+              name: typeof msg.name === "string" ? msg.name : "Guest",
+              x: msg.x,
+              y: msg.y,
+              drawing: msg.drawing === true,
             });
           }
           break;

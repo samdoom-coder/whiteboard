@@ -196,5 +196,5 @@ export const makeImage = (
   return el;
 };
 
-/** clone an element with a fresh id (used by AI/templates to re-place same-shape defs) */
+/** clone an element with a fresh id (used by AI to re-place same-shape defs) */
 export const cloneElement = (el: Element): Element => ({ ...el, id: uid(), seed: Math.floor(Math.random() * 2 ** 31) });
