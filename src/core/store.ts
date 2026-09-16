@@ -23,7 +23,7 @@ export interface WhiteboardState {
 
   saveStatus: "idle" | "dirty" | "saving" | "saved" | "error";
 
-  /** true while a topbar menu (templates/settings) is open */
+  /** true while a topbar menu (settings etc.) is open */
   popoverOpen: boolean;
   setPopoverOpen: (v: boolean) => void;
 

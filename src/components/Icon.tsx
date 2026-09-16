@@ -112,14 +112,6 @@ const paths: Record<string, React.ReactNode> = {
       <circle cx="18" cy="18" r="1.3" />
     </>
   ),
-  template: (
-    <>
-      <rect x="4" y="4" width="7" height="7" rx="1" />
-      <rect x="13" y="4" width="7" height="7" rx="1" />
-      <rect x="4" y="13" width="7" height="7" rx="1" />
-      <rect x="13" y="13" width="7" height="7" rx="1" />
-    </>
-  ),
   sparkle: (
     <>
       <path d="M12 3l1.8 4.8L18 9.6l-4.2 1.8L12 16l-1.8-4.6L6 9.6l4.2-1.8z" />
