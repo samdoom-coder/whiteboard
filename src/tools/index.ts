@@ -1,6 +1,7 @@
 import type { ToolType } from "../types";
 import type { Tool } from "./Tool";
 import { SelectionTool } from "./SelectionTool";
+import { LassoTool } from "./LassoTool";
 import { ShapeTool } from "./ShapeTool";
 import { LineArrowTool } from "./LineArrowTool";
 import { PencilTool } from "./PencilTool";
@@ -15,6 +16,7 @@ const toolMap = new Map<ToolType, Tool>();
 const register = (t: Tool) => toolMap.set(t.id, t);
 
 register(new SelectionTool());
+register(new LassoTool());
 register(new ShapeTool("rectangle"));
 register(new ShapeTool("roundedRectangle"));
 register(new ShapeTool("ellipse"));
@@ -38,6 +40,7 @@ export const toolDefinitions: Array<{
   shortcut: string;
 }> = [
   { id: "selection", label: "Selection", icon: "cursor", shortcut: "V" },
+  { id: "lasso", label: "Lasso select", icon: "lasso", shortcut: "O" },
   { id: "rectangle", label: "Rectangle", icon: "rect", shortcut: "R" },
   { id: "roundedRectangle", label: "Rounded rectangle", icon: "rounded-rect", shortcut: "U" },
   { id: "ellipse", label: "Ellipse", icon: "ellipse", shortcut: "E" },
@@ -58,4 +61,4 @@ export const toolDefinitions: Array<{
  * tool strip. Add future extra tools here — the toolbar renders them in
  * the overflow popover automatically.
  */
-export const overflowToolIds: ToolType[] = ["laser"];
+export const overflowToolIds: ToolType[] = ["lasso", "laser"];

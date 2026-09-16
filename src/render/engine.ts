@@ -181,6 +181,12 @@ export class CanvasEngine {
       this.drawMarquee(ctx, this.marquee, state.theme);
     }
 
+    // lasso path
+    if (this.lasso) {
+      ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+      this.drawLasso(ctx, this.lasso, state.theme);
+    }
+
     this.drawLaser(ctx, view);
   }
 
@@ -192,6 +198,37 @@ export class CanvasEngine {
 
   clearMarquee() {
     this.marquee = null;
+  }
+
+  private lasso: Array<{ x: number; y: number }> | null = null;
+  setLasso(path: Array<{ x: number; y: number }> | null) {
+    this.lasso = path;
+    this.emit();
+  }
+
+  clearLasso() {
+    this.lasso = null;
+  }
+
+  private drawLasso(
+    ctx: CanvasRenderingContext2D,
+    path: Array<{ x: number; y: number }>,
+    theme: keyof typeof palettes,
+  ) {
+    if (path.length < 2) return;
+    const p = palettes[theme];
+    ctx.save();
+    ctx.strokeStyle = p.selectionBorder;
+    ctx.fillStyle = p.selectionFill;
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
   }
 
   private drawMarquee(

@@ -12,7 +12,7 @@ Everything runs locally in your browser. Documents are autosaved to `localStorag
 ## ✨ Features
 
 ### Drawing
-- **13 tools** — selection, rectangle, rounded rectangle, ellipse, diamond, line, arrow, pencil (freehand), text, image, eraser, and pan/hand, plus a **laser pointer** (`K`, in the ⋯ overflow menu) that draws glowing trails which fade tail-first after ~2s and are never saved to the canvas.
+- **14 tools** — selection, rectangle, rounded rectangle, ellipse, diamond, line, arrow, pencil (freehand), text, image, eraser, and pan/hand, plus lasso select (`O`) and a **laser pointer** (`K`) in the ⋯ overflow menu. The laser draws glowing trails which fade tail-first after ~2s and are never saved to the canvas.
 - **Hand-drawn rendering** — organic, sketch-style strokes with adjustable roughness for that whiteboard feel.
 - **Connectors that stick** — arrows bind to shapes and stay attached as you move or resize them.
 - **Rich styling** — per-element stroke color, fill color, fill style (solid / hachure / crosshatch), stroke width, line style (solid / dashed / dotted), opacity, and roughness.
@@ -27,7 +27,7 @@ Everything runs locally in your browser. Documents are autosaved to `localStorag
 
 ### Workflow
 - **Undo / redo** with 120-step history.
-- **Multi-select** — click, shift-click, marquee, and select-all; move, resize, rotate, and reorder (front / back / forward / backward) freely.
+- **Multi-select** — click, shift-click, marquee, lasso loop, and select-all; move, resize, rotate, and reorder (front / back / forward / backward) freely.
 - **Copy / paste / duplicate**.
 - **Command palette** (`Ctrl/⌘ + K`) and a full set of **keyboard shortcuts**.
 - **Minimap** for navigating large boards.
@@ -82,7 +82,7 @@ Then hit the **Share** button (top bar) to start a session and copy the invite l
 
 | Action              | Shortcut                |
 | ------------------- | ----------------------- |
-| Selection           | `V`                     |
+| Selection / Lasso     | `V` / `O`               |
 | Shapes (rect / rounded / ellipse / diamond) | `R` `U` `E` `D` |
 | Line / Arrow        | `L` `A`                 |
 | Pencil / Text / Hand| `P` `T` `H`            |

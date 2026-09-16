@@ -23,6 +23,12 @@ const paths: Record<string, React.ReactNode> = {
       <path d="M5 3l14 8-6 1.5L11 19z" />
     </>
   ),
+  lasso: (
+    <>
+      <path d="M6.5 10.5c-1-4.5 3.5-7.5 8-6.5 4.5 1 6.5 5.5 4.5 9s-7 5-10 3-3-6 1-7.5" strokeDasharray="3.5 2.5" />
+      <path d="M6.5 10.5c-1.5 2-1.5 5 .5 7.5s4.5 3.5 7 3" />
+    </>
+  ),
   rect: <rect x="4" y="4" width="16" height="16" rx="1" />,
   "rounded-rect": <rect x="4" y="4" width="16" height="16" rx="5" />,
   ellipse: <ellipse cx="12" cy="12" rx="8" ry="6" />,

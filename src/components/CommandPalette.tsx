@@ -43,6 +43,8 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       fileInput.click();
     };
     return [
+      { id: "select", title: "Select", keywords: "select selection cursor move", icon: "cursor", action: () => s.setTool("selection") },
+      { id: "lasso", title: "Lasso select", keywords: "lasso select freeform loop", icon: "lasso", action: () => s.setTool("lasso") },
       { id: "rect", title: "Create rectangle", keywords: "rect shape box", icon: "rect", action: () => s.setTool("rectangle") },
       { id: "rounded-rect", title: "Create rounded rectangle", keywords: "rounded rect shape box", icon: "rounded-rect", action: () => s.setTool("roundedRectangle") },
       { id: "ellipse", title: "Create ellipse", keywords: "ellipse circle oval", icon: "ellipse", action: () => s.setTool("ellipse") },

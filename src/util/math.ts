@@ -73,6 +73,43 @@ export const pointInRect = (
   h: number,
 ) => px >= x && px <= x + w && py >= y && py <= y + h;
 
+/** Ray-cast point-in-polygon test (works on open paths via implicit closure). */
+export const pointInPolygon = (px: number, py: number, poly: Point[]): boolean => {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i].x;
+    const yi = poly[i].y;
+    const xj = poly[j].x;
+    const yj = poly[j].y;
+    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+};
+
+/** Do two line segments intersect (including touching endpoints)? */
+export const segmentsIntersect = (
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  cx: number,
+  cy: number,
+  dx: number,
+  dy: number,
+): boolean => {
+  const rX = bx - ax;
+  const rY = by - ay;
+  const sX = dx - cx;
+  const sY = dy - cy;
+  const denom = rX * sY - rY * sX;
+  if (Math.abs(denom) < 1e-12) return false;
+  const t = ((cx - ax) * sY - (cy - ay) * sX) / denom;
+  const u = ((cx - ax) * rY - (cy - ay) * rX) / denom;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+};
+
 /** Does a point lie inside a rotated rectangle? */
 export const pointInRotatedRect = (
   px: number,

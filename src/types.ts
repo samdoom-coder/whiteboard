@@ -2,6 +2,7 @@ export type Theme = "light" | "dark";
 export type BackgroundStyle = "none" | "grid" | "dots";
 export type ToolType =
   | "selection"
+  | "lasso"
   | "rectangle"
   | "roundedRectangle"
   | "ellipse"
