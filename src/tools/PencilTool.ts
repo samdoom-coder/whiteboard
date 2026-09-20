@@ -117,8 +117,8 @@ export class PencilTool extends BaseTool {
       : makePencil(this.minX + minX, this.minY + minY, normalized, { ...s.activeStyle });
     s.setElementsLive([...s.doc.elements.filter((e) => e.id !== this.tempId), el]);
     s.commit();
-    s.select([el.id]);
-    s.setTool("selection");
+    // Stay in pencil tool for continuous drawing (no auto-switch to selection).
+    s.select([]);
     ctx.engine.emit();
     this.tempId = null;
     this.points = [];
